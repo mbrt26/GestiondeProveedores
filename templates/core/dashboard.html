@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Sistema de Gestión de Proveedores{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Bienvenido, {{ user.nombre }}</h4>
+        <p class="text-muted mb-0">Aquí está el resumen de tus actividades</p>
+    </div>
+    <div>
+        <span class="badge bg-light text-dark">
+            <i class="bi bi-calendar3 me-1"></i>
+            {% now "d F Y" %}
+        </span>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-xl-3">
+        <div class="card stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+                    <i class="bi bi-folder-fill"></i>
+                </div>
+                <div>
+                    <p class="stat-value">{{ stats.proyectos_activos|default:0 }}</p>
+                    <p class="stat-label">Proyectos Activos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                    <i class="bi bi-truck"></i>
+                </div>
+                <div>
+                    <p class="stat-value">{{ stats.proveedores_activos|default:0 }}</p>
+                    <p class="stat-label">Proveedores Activos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
+                    <i class="bi bi-list-check"></i>
+                </div>
+                <div>
+                    <p class="stat-value">{{ stats.tareas_pendientes|default:0 }}</p>
+                    <p class="stat-label">Tareas Pendientes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-info bg-opacity-10 text-info me-3">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div>
+                    <p class="stat-value">{{ stats.progreso_promedio|default:0 }}%</p>
+                    <p class="stat-label">Progreso Promedio</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Chart: Distribución por Etapas -->
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Distribución de Proveedores por Etapa</h6>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Exportar</a></li>
+                        <li><a class="dropdown-item" href="#">Ver detalle</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="etapasChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0">Actividad Reciente</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for actividad in actividades_recientes %}
+                    <div class="list-group-item py-3">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                {% if actividad.tipo == 'etapa' %}
+                                <span class="badge bg-success rounded-pill p-2">
+                                    <i class="bi bi-arrow-right"></i>
+                                </span>
+                                {% elif actividad.tipo == 'tarea' %}
+                                <span class="badge bg-primary rounded-pill p-2">
+                                    <i class="bi bi-check"></i>
+                                </span>
+                                {% else %}
+                                <span class="badge bg-info rounded-pill p-2">
+                                    <i class="bi bi-bell"></i>
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-1">{{ actividad.descripcion }}</p>
+                                <small class="text-muted">{{ actividad.fecha|timesince }} atrás</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-clock-history fs-1"></i>
+                        <p class="mb-0 mt-2">Sin actividad reciente</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Proyectos Activos -->
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Proyectos Activos</h6>
+        <a href="{% url 'proyectos:lista' %}" class="btn btn-sm btn-primary">Ver todos</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Proyecto</th>
+                        <th>Empresa Ancla</th>
+                        <th>Proveedores</th>
+                        <th>Progreso</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for proyecto in proyectos_activos %}
+                    <tr>
+                        <td>
+                            <div class="fw-medium">{{ proyecto.nombre }}</div>
+                            <small class="text-muted">{{ proyecto.codigo }}</small>
+                        </td>
+                        <td>{{ proyecto.empresa_ancla.razon_social }}</td>
+                        <td>
+                            <span class="badge bg-light text-dark">
+                                {{ proyecto.proveedores_proyecto.count }} proveedores
+                            </span>
+                        </td>
+                        <td style="width: 200px;">
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2">
+                                    <div class="progress-bar bg-success" style="width: {{ proyecto.progreso }}%"></div>
+                                </div>
+                                <span class="text-muted small">{{ proyecto.progreso }}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if proyecto.estado == 'EN_CURSO' %}
+                            <span class="badge bg-primary">En Curso</span>
+                            {% elif proyecto.estado == 'PLANIFICACION' %}
+                            <span class="badge bg-secondary">Planificación</span>
+                            {% elif proyecto.estado == 'FINALIZADO' %}
+                            <span class="badge bg-success">Finalizado</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'proyectos:detalle' proyecto.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            No hay proyectos activos
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Próximos Talleres -->
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Próximos Talleres</h6>
+        <a href="{% url 'talleres:lista' %}" class="btn btn-sm btn-primary">Ver todos</a>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            {% for taller in proximos_talleres %}
+            <div class="col-md-6 col-lg-4">
+                <div class="border rounded p-3">
+                    <div class="d-flex align-items-start">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded p-2 me-3">
+                            <i class="bi bi-mortarboard-fill fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ taller.nombre }}</h6>
+                            <p class="text-muted small mb-2">{{ taller.tipo }}</p>
+                            <div class="d-flex align-items-center text-muted small">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                {{ taller.fecha_inicio|date:"d M Y" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-4 text-muted">
+                No hay talleres programados
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Etapas Chart
+    const ctx = document.getElementById('etapasChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Etapa 1: Diagnóstico', 'Etapa 2: Plan', 'Etapa 3: Implementación', 'Etapa 4: Monitoreo'],
+            datasets: [{
+                label: 'Proveedores',
+                data: [
+                    {{ stats.etapa1|default:0 }},
+                    {{ stats.etapa2|default:0 }},
+                    {{ stats.etapa3|default:0 }},
+                    {{ stats.etapa4|default:0 }}
+                ],
+                backgroundColor: [
+                    'rgba(13, 110, 253, 0.8)',
+                    'rgba(25, 135, 84, 0.8)',
+                    'rgba(255, 193, 7, 0.8)',
+                    'rgba(13, 202, 240, 0.8)'
+                ],
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

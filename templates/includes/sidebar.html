@@ -1,0 +1,131 @@
+<!-- Sidebar -->
+<nav class="sidebar">
+    <!-- Brand -->
+    <div class="sidebar-brand d-flex align-items-center">
+        <i class="bi bi-buildings text-primary fs-3 me-2"></i>
+        <h5>Fortalecimiento</h5>
+    </div>
+
+    <!-- Navigation -->
+    <div class="sidebar-nav">
+        <!-- Main -->
+        <div class="nav-section">Principal</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'core:dashboard' %}">
+                    <i class="bi bi-grid-1x2-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+        </ul>
+
+        {% if user.rol == 'ADMIN' or user.rol == 'EMPRESA_ANCLA' or user.rol == 'CONSULTOR' %}
+        <!-- Empresas -->
+        <div class="nav-section">Gestión</div>
+        <ul class="nav flex-column">
+            {% if user.rol == 'ADMIN' %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'empresas' in request.path %}active{% endif %}" href="{% url 'empresas:lista' %}">
+                    <i class="bi bi-building"></i>
+                    <span>Empresas Ancla</span>
+                </a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'proveedores' in request.path %}active{% endif %}" href="{% url 'proveedores:lista' %}">
+                    <i class="bi bi-truck"></i>
+                    <span>Proveedores</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'proyectos' in request.path %}active{% endif %}" href="{% url 'proyectos:lista' %}">
+                    <i class="bi bi-folder-fill"></i>
+                    <span>Proyectos</span>
+                </a>
+            </li>
+        </ul>
+        {% endif %}
+
+        <!-- Etapas -->
+        <div class="nav-section">Etapas del Proceso</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if 'etapa1' in request.path %}active{% endif %}" href="{% url 'etapas:etapa1_lista' %}">
+                    <i class="bi bi-1-circle"></i>
+                    <span>Diagnóstico</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'etapa2' in request.path %}active{% endif %}" href="{% url 'etapas:etapa2_lista' %}">
+                    <i class="bi bi-2-circle"></i>
+                    <span>Plan de Mejora</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'etapa3' in request.path %}active{% endif %}" href="{% url 'etapas:etapa3_lista' %}">
+                    <i class="bi bi-3-circle"></i>
+                    <span>Implementación</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'etapa4' in request.path %}active{% endif %}" href="{% url 'etapas:etapa4_lista' %}">
+                    <i class="bi bi-4-circle"></i>
+                    <span>Monitoreo</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Talleres y Reportes -->
+        <div class="nav-section">Complementarios</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if 'talleres' in request.path %}active{% endif %}" href="{% url 'talleres:lista' %}">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    <span>Talleres</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'reportes' in request.path %}active{% endif %}" href="{% url 'reportes:lista' %}">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    <span>Reportes</span>
+                </a>
+            </li>
+        </ul>
+
+        {% if user.rol == 'ADMIN' %}
+        <!-- Administración -->
+        <div class="nav-section">Administración</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'admin:index' %}">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Panel Admin</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'usuarios' in request.path %}active{% endif %}" href="{% url 'core:usuario_lista' %}">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Usuarios</span>
+                </a>
+            </li>
+        </ul>
+        {% endif %}
+    </div>
+
+    <!-- User Info -->
+    <div class="sidebar-footer p-3 border-top border-secondary mt-auto">
+        <div class="d-flex align-items-center text-white">
+            {% if user.foto %}
+            <img src="{{ user.foto.url }}" alt="{{ user.get_full_name }}" class="avatar me-2">
+            {% else %}
+            <div class="avatar bg-primary d-flex align-items-center justify-content-center me-2">
+                <span class="text-white fw-bold">{{ user.nombre|slice:":1" }}{{ user.apellido|slice:":1" }}</span>
+            </div>
+            {% endif %}
+            <div class="flex-grow-1 overflow-hidden">
+                <div class="fw-medium text-truncate">{{ user.get_full_name }}</div>
+                <small class="text-muted">{{ user.get_rol_display }}</small>
+            </div>
+        </div>
+    </div>
+</nav>
