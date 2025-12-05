@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Proyectos - Sistema de Gestión{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item active">Proyectos</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Proyectos de Fortalecimiento</h4>
+        <p class="text-muted mb-0">Ciclos de fortalecimiento de proveedores</p>
+    </div>
+    <a href="{% url 'proyectos:crear' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Nuevo Proyecto
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="buscar" class="form-control" placeholder="Buscar por código o nombre..." value="{{ request.GET.buscar }}">
+            </div>
+            <div class="col-md-3">
+                <select name="estado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    {% for value, label in estados %}
+                    <option value="{{ value }}" {% if request.GET.estado == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="empresa" class="form-select">
+                    <option value="">Todas las empresas</option>
+                    {% for empresa in empresas %}
+                    <option value="{{ empresa.pk }}" {% if request.GET.empresa == empresa.pk|stringformat:"s" %}selected{% endif %}>{{ empresa.razon_social }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-search"></i> Buscar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de proyectos -->
+<div class="row g-4">
+    {% for proyecto in proyectos %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <span class="badge bg-light text-dark">{{ proyecto.codigo }}</span>
+                    {% if proyecto.estado == 'EN_CURSO' %}
+                    <span class="badge bg-primary">En Curso</span>
+                    {% elif proyecto.estado == 'PLANIFICACION' %}
+                    <span class="badge bg-secondary">Planificación</span>
+                    {% elif proyecto.estado == 'FINALIZADO' %}
+                    <span class="badge bg-success">Finalizado</span>
+                    {% elif proyecto.estado == 'SUSPENDIDO' %}
+                    <span class="badge bg-warning">Suspendido</span>
+                    {% else %}
+                    <span class="badge bg-danger">Cancelado</span>
+                    {% endif %}
+                </div>
+                <h5 class="card-title">{{ proyecto.nombre }}</h5>
+                <p class="text-muted small mb-3">{{ proyecto.empresa_ancla.razon_social }}</p>
+
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <div class="fs-5 fw-bold text-primary">{{ proyecto.num_proveedores|default:0 }}</div>
+                        <small class="text-muted">Proveedores</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="fs-5 fw-bold text-success">{{ proyecto.avance_promedio|floatformat:0|default:0 }}%</div>
+                        <small class="text-muted">Avance</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="fs-5 fw-bold text-warning">{{ proyecto.dias_restantes|default:0 }}</div>
+                        <small class="text-muted">Días rest.</small>
+                    </div>
+                </div>
+
+                <div class="progress mb-3" style="height: 6px;">
+                    <div class="progress-bar bg-success" style="width: {{ proyecto.avance_promedio|default:0 }}%"></div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="bi bi-calendar3 me-1"></i>{{ proyecto.fecha_inicio|date:"d M Y" }}
+                    </small>
+                    <a href="{% url 'proyectos:detalle' proyecto.pk %}" class="btn btn-sm btn-outline-primary">
+                        Ver proyecto <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5 text-muted">
+                <i class="bi bi-folder fs-1 d-block mb-2"></i>
+                <h5>No hay proyectos</h5>
+                <p>Comienza creando tu primer proyecto de fortalecimiento</p>
+                <a href="{% url 'proyectos:crear' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i>Crear Proyecto
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

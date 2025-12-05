@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Proveedores - Sistema de Gestión{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item active">Proveedores</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Proveedores</h4>
+        <p class="text-muted mb-0">Gestión de proveedores del programa</p>
+    </div>
+    <div>
+        {% if user.es_admin %}
+        <a href="{% url 'proveedores:importar' %}" class="btn btn-outline-primary me-2">
+            <i class="bi bi-upload me-1"></i>Importar Excel
+        </a>
+        {% endif %}
+        <a href="{% url 'proveedores:crear' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Nuevo Proveedor
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <input type="text" name="buscar" class="form-control" placeholder="Buscar..." value="{{ request.GET.buscar }}">
+            </div>
+            <div class="col-md-2">
+                <select name="sector" class="form-select">
+                    <option value="">Sector</option>
+                    {% for value, label in sectores %}
+                    <option value="{{ value }}" {% if request.GET.sector == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="tamano" class="form-select">
+                    <option value="">Tamaño</option>
+                    {% for value, label in tamanos %}
+                    <option value="{{ value }}" {% if request.GET.tamano == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="empresa_ancla" class="form-select">
+                    <option value="">Empresa Ancla</option>
+                    {% for ea in empresas_ancla %}
+                    <option value="{{ ea.pk }}" {% if request.GET.empresa_ancla == ea.pk|stringformat:"s" %}selected{% endif %}>{{ ea.razon_social }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary me-2"><i class="bi bi-search"></i> Buscar</button>
+                <a href="{% url 'proveedores:lista' %}" class="btn btn-outline-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Proveedor</th>
+                        <th>NIT</th>
+                        <th>Sector</th>
+                        <th>Tamaño</th>
+                        <th>Ciudad</th>
+                        <th class="text-center">Proyectos</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for proveedor in proveedores %}
+                    <tr>
+                        <td>
+                            <div class="fw-medium">{{ proveedor.razon_social }}</div>
+                            <small class="text-muted">{{ proveedor.email }}</small>
+                        </td>
+                        <td>{{ proveedor.nit }}</td>
+                        <td>{{ proveedor.get_sector_economico_display|default:"-" }}</td>
+                        <td>{{ proveedor.get_tamano_empresa_display|default:"-" }}</td>
+                        <td>{{ proveedor.ciudad|default:"-" }}</td>
+                        <td class="text-center">
+                            <span class="badge bg-primary">{{ proveedor.num_proyectos|default:0 }}</span>
+                        </td>
+                        <td>
+                            <a href="{% url 'proveedores:detalle' proveedor.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="bi bi-truck fs-1 d-block mb-2"></i>
+                            No hay proveedores registrados
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
