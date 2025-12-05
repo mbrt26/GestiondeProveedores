@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Empresas Ancla - Sistema de Gestión{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item active">Empresas Ancla</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Empresas Ancla</h4>
+        <p class="text-muted mb-0">Gestión de empresas ancla del programa</p>
+    </div>
+    {% if user.es_admin %}
+    <a href="{% url 'empresas:crear' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Nueva Empresa
+    </a>
+    {% endif %}
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="buscar" class="form-control" placeholder="Buscar por nombre, NIT..." value="{{ request.GET.buscar }}">
+            </div>
+            <div class="col-md-3">
+                <select name="sector" class="form-select">
+                    <option value="">Todos los sectores</option>
+                    {% for value, label in sectores %}
+                    <option value="{{ value }}" {% if request.GET.sector == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="estado" class="form-select">
+                    <option value="">Estado</option>
+                    <option value="activo" {% if request.GET.estado == 'activo' %}selected{% endif %}>Activas</option>
+                    <option value="inactivo" {% if request.GET.estado == 'inactivo' %}selected{% endif %}>Inactivas</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+                <a href="{% url 'empresas:lista' %}" class="btn btn-outline-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de empresas -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Empresa</th>
+                        <th>NIT</th>
+                        <th>Sector</th>
+                        <th>Ciudad</th>
+                        <th class="text-center">Proyectos</th>
+                        <th class="text-center">Proveedores</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for empresa in empresas %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if empresa.logo %}
+                                <img src="{{ empresa.logo.url }}" alt="" class="avatar me-2" style="width:40px;height:40px;">
+                                {% else %}
+                                <div class="avatar bg-primary bg-opacity-10 text-primary me-2 d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-medium">{{ empresa.razon_social }}</div>
+                                    {% if empresa.nombre_comercial %}
+                                    <small class="text-muted">{{ empresa.nombre_comercial }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ empresa.nit }}</td>
+                        <td>{{ empresa.get_sector_display|default:"-" }}</td>
+                        <td>{{ empresa.ciudad|default:"-" }}</td>
+                        <td class="text-center">
+                            <span class="badge bg-primary">{{ empresa.num_proyectos|default:0 }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-success">{{ empresa.num_proveedores|default:0 }}</span>
+                        </td>
+                        <td>
+                            {% if empresa.is_active %}
+                            <span class="badge bg-success">Activa</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactiva</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{% url 'empresas:detalle' empresa.pk %}"><i class="bi bi-eye me-2"></i>Ver detalle</a></li>
+                                    {% if user.es_admin %}
+                                    <li><a class="dropdown-item" href="{% url 'empresas:editar' empresa.pk %}"><i class="bi bi-pencil me-2"></i>Editar</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'empresas:eliminar' empresa.pk %}"><i class="bi bi-trash me-2"></i>Eliminar</a></li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <i class="bi bi-building fs-1 d-block mb-2"></i>
+                            No hay empresas ancla registradas
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Paginación -->
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

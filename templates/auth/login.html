@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Iniciar Sesión - Sistema de Gestión de Proveedores{% endblock %}
+
+{% block auth_content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-5" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5 col-xl-4">
+                <div class="text-center mb-4">
+                    <div class="bg-white rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-buildings text-primary fs-1"></i>
+                    </div>
+                    <h3 class="text-white mb-1">Sistema de Fortalecimiento</h3>
+                    <p class="text-white-50">de Proveedores</p>
+                </div>
+
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-4 p-lg-5">
+                        <h5 class="mb-4 text-center">Iniciar Sesión</h5>
+
+                        <form method="post" action="{% url 'core:login' %}">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Correo Electrónico</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-envelope text-muted"></i>
+                                    </span>
+                                    <input type="email" name="username" id="email"
+                                           class="form-control border-start-0 ps-0"
+                                           placeholder="correo@ejemplo.com" required autofocus>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label for="password" class="form-label">Contraseña</label>
+                                    <a href="{% url 'core:password_reset' %}" class="text-decoration-none small">
+                                        ¿Olvidaste tu contraseña?
+                                    </a>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-lock text-muted"></i>
+                                    </span>
+                                    <input type="password" name="password" id="password"
+                                           class="form-control border-start-0 ps-0"
+                                           placeholder="••••••••" required>
+                                    <button class="btn btn-outline-secondary border-start-0" type="button"
+                                            onclick="togglePassword()">
+                                        <i class="bi bi-eye" id="toggleIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                                    <label class="form-check-label" for="remember">
+                                        Recordarme
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 py-2">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <p class="text-center text-white-50 mt-4 small">
+                    &copy; {% now "Y" %} Sistema de Gestión de Proveedores.<br>
+                    Todos los derechos reservados.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('bi-eye');
+        toggleIcon.classList.add('bi-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('bi-eye-slash');
+        toggleIcon.classList.add('bi-eye');
+    }
+}
+</script>
+{% endblock %}

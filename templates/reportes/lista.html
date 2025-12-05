@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes - Sistema de Gestión{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item active">Reportes</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Reportes</h4>
+        <p class="text-muted mb-0">Generación y descarga de reportes</p>
+    </div>
+    <a href="{% url 'reportes:generar' %}" class="btn btn-primary">
+        <i class="bi bi-file-earmark-plus me-1"></i>Generar Reporte
+    </a>
+</div>
+
+<!-- Tipos de reportes -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center py-4">
+                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                    <i class="bi bi-building fs-3 text-primary"></i>
+                </div>
+                <h6>Reporte por Empresa</h6>
+                <p class="text-muted small">Estado de todos los proveedores de una empresa ancla</p>
+                <a href="{% url 'reportes:generar' %}?tipo=empresa" class="btn btn-sm btn-outline-primary">Generar</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center py-4">
+                <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                    <i class="bi bi-folder fs-3 text-success"></i>
+                </div>
+                <h6>Reporte por Proyecto</h6>
+                <p class="text-muted small">Avance y estado de un proyecto específico</p>
+                <a href="{% url 'reportes:generar' %}?tipo=proyecto" class="btn btn-sm btn-outline-success">Generar</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center py-4">
+                <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                    <i class="bi bi-graph-up fs-3 text-info"></i>
+                </div>
+                <h6>Reporte de KPIs</h6>
+                <p class="text-muted small">Indicadores y métricas de seguimiento</p>
+                <a href="{% url 'reportes:generar' %}?tipo=kpis" class="btn btn-sm btn-outline-info">Generar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reportes generados -->
+<div class="card">
+    <div class="card-header">
+        <h6 class="mb-0">Reportes Generados</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Reporte</th>
+                        <th>Tipo</th>
+                        <th>Fecha</th>
+                        <th>Generado por</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reporte in reportes %}
+                    <tr>
+                        <td>
+                            <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                            {{ reporte.nombre }}
+                        </td>
+                        <td>{{ reporte.get_tipo_display }}</td>
+                        <td>{{ reporte.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>{{ reporte.generado_por.get_full_name }}</td>
+                        <td>
+                            <a href="{{ reporte.archivo.url }}" class="btn btn-sm btn-outline-primary" download>
+                                <i class="bi bi-download"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            No hay reportes generados
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

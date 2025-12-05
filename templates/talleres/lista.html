@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Talleres - Sistema de Gestión{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item active">Talleres</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Talleres Especializados</h4>
+        <p class="text-muted mb-0">Gestión de los 4 talleres del programa</p>
+    </div>
+    <a href="{% url 'talleres:crear' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Nuevo Taller
+    </a>
+</div>
+
+<!-- Lista de talleres -->
+<div class="row g-4">
+    {% for taller in talleres %}
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <span class="badge
+                        {% if taller.tipo == 'EMPRESARIALIDAD' %}bg-primary
+                        {% elif taller.tipo == 'PRODUCTIVIDAD' %}bg-success
+                        {% elif taller.tipo == 'CALIDAD' %}bg-warning
+                        {% else %}bg-info{% endif %}">
+                        {{ taller.get_tipo_display }}
+                    </span>
+                    <span class="badge
+                        {% if taller.estado == 'PROGRAMADO' %}bg-secondary
+                        {% elif taller.estado == 'EN_CURSO' %}bg-primary
+                        {% else %}bg-success{% endif %}">
+                        {{ taller.get_estado_display }}
+                    </span>
+                </div>
+
+                <h5 class="card-title mb-2">{{ taller.nombre }}</h5>
+                <p class="text-muted small">{{ taller.descripcion|truncatewords:20 }}</p>
+
+                <div class="row text-center border-top pt-3 mt-3">
+                    <div class="col-4">
+                        <i class="bi bi-clock text-muted"></i>
+                        <div class="small">{{ taller.duracion_horas }} horas</div>
+                    </div>
+                    <div class="col-4">
+                        <i class="bi bi-people text-muted"></i>
+                        <div class="small">{{ taller.capacidad_maxima }} cupos</div>
+                    </div>
+                    <div class="col-4">
+                        <i class="bi bi-laptop text-muted"></i>
+                        <div class="small">{{ taller.get_modalidad_display }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="{% url 'talleres:detalle' taller.pk %}" class="btn btn-outline-primary btn-sm w-100">
+                    Ver taller <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5 text-muted">
+                <i class="bi bi-mortarboard fs-1 d-block mb-2"></i>
+                <h5>No hay talleres</h5>
+                <p>Comienza creando el primer taller</p>
+                <a href="{% url 'talleres:crear' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i>Crear Taller
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

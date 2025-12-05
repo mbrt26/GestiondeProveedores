@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Etapa 1: Diagnóstico - Sistema de Gestión{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item active">Etapa 1: Diagnóstico</li>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h4 class="mb-1">Etapa 1: Diagnóstico de Competitividad</h4>
+    <p class="text-muted mb-0">Proveedores en fase de diagnóstico inicial</p>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Proveedor</th>
+                        <th>Proyecto</th>
+                        <th>Estado</th>
+                        <th>Progreso</th>
+                        <th>Fecha Inicio</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pp in proveedores_proyecto %}
+                    <tr>
+                        <td>
+                            <div class="fw-medium">{{ pp.proveedor.razon_social }}</div>
+                            <small class="text-muted">{{ pp.proveedor.email }}</small>
+                        </td>
+                        <td>{{ pp.proyecto.nombre }}</td>
+                        <td>
+                            {% if pp.etapa1.estado == 'PENDIENTE' %}
+                            <span class="badge bg-secondary">Pendiente</span>
+                            {% elif pp.etapa1.estado == 'EN_PROCESO' %}
+                            <span class="badge bg-primary">En Proceso</span>
+                            {% else %}
+                            <span class="badge bg-success">Completado</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="progress" style="width: 100px; height: 8px;">
+                                <div class="progress-bar bg-success" style="width: {{ pp.progreso_etapa1|default:0 }}%"></div>
+                            </div>
+                        </td>
+                        <td>{{ pp.fecha_inicio|date:"d/m/Y"|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'etapas:etapa1_detalle' pp.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            No hay proveedores en Etapa 1
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
